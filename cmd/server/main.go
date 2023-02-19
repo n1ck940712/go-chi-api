@@ -1,7 +1,7 @@
 package main
 
 import (
-	"go-chi-api/pkg/api"
+	"go-chi-api/api/post"
 	"log"
 	"net/http"
 	"os"
@@ -33,7 +33,7 @@ func main() {
 		w.Write([]byte("Hello World!"))
 	})
 
-	r.Mount("/posts", api.PostsResource{}.Routes())
+	r.Mount("/posts", post.PostsResource{}.Routes())
 
 	log.Fatal(http.ListenAndServe(":"+port, r))
 }
