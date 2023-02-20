@@ -26,5 +26,53 @@ go.work
 
 # End of https://www.toptal.com/developers/gitignore/api/go
 
-
+# env files
 *.env
+
+# others
+*.cnf
+*.pyc
+*sqlite3
+.env
+*env
+.DS_Store
+
+*.diff.*
+.last_built_image
+
+staticfiles
+static/
+__pycache__
+local.py
+logo/
+*media/
+*celerybeat*
+logs/
+*.log
+
+# linters
+.mypy_cache
+
+libs/*/*.egg-info
+
+uwsgi.ini
+newrelic.ini
+geckodriver.log
+esports/static
+esports/.env
+
+# test coverage
+.coverage
+htmlcov
+
+build/docker/docker-compose.test.local.yml
+
+# PyCharm
+.idea
+
+pytest.log
+test-result.xml
+test-result.html
+
+# database files
+build/docker/data
