@@ -1,0 +1,29 @@
+version: ''
+networks:
+  default:
+    external:
+      name: default_network
+services:
+  # postgres_db:
+  #   image: postgres
+  #   restart: always
+  #   environment:
+  #     PG_USER: postgres
+  #     PG_PASSWORD: postgres
+  #     PG_DB: postgres
+  api:
+    build:
+      context: .
+      dockerfile: build/docker/Dockerfile.local
+    env_file:
+      - build/docker/local.env
+    environment:
+      - SERVER_TYPE=api
+      - SERVER_IDENTIFIER=api_main
+      - SERVER_PORT=8080
+    ports:
+     - 8080:8080
+    volumes:
+      - .:/app/
+    # depends_on:
+    #   - postgres_db
