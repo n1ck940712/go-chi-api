@@ -7,7 +7,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type TestTable struct {
+type ItemTable struct {
 	gorm.Model
 	ID        uuid.UUID `json:"id" gorm:"type:uuid;primary_key;default:uuid_generate_v4()"`
 	Column1   string    `json:"column1" gorm:"text;not null;default:null"`
