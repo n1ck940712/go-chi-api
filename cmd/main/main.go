@@ -5,6 +5,8 @@ import (
 	"os"
 )
 
+var test int
+
 func main() {
 	switch getServerType() {
 	case "api":
