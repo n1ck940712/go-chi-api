@@ -16,7 +16,7 @@ services:
   api:
     build:
       context: .
-      dockerfile: build/docker/Dockerfile.local
+      dockerfile: build/docker/Dockerfile.${DOCKERFILE_BASE:-local}
     env_file:
       - build/docker/local.env
     environment:
