@@ -4,13 +4,15 @@ networks:
     external:
       name: default_network
 services:
-  # postgres_db:
-  #   image: postgres
-  #   restart: always
-  #   environment:
-  #     PG_USER: postgres
-  #     PG_PASSWORD: postgres
-  #     PG_DB: postgres
+  postgres_db:
+    image: postgres:10.7
+    restart: always
+    # build:
+    #   context: ../../
+    env_file:
+      - build/docker/local.env
+    volumes:
+      - ./build/docker/data/pgdata/:/var/lib/postgresql/data/
   api:
     build:
       context: .

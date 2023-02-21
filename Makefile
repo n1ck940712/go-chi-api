@@ -24,6 +24,9 @@ rebuild: ## Rebuild docker containers
 restart: ## Restart docker containers
 	$(DOCKER_COMPOSE_COMMAND) restart
 
+psql: ## Connect to postgres container
+	$(DOCKER_COMPOSE_COMMAND) exec postgres_db psql -U postgres
+
 network_create: ## Create default docker network
 	docker network create $(DOCKER_NETWORK)
 

@@ -2,6 +2,8 @@ package api
 
 import (
 	"go-chi-api/api/post"
+	"go-chi-api/internal/database"
+	"go-chi-api/internal/migrations"
 	"log"
 	"net/http"
 
@@ -10,7 +12,8 @@ import (
 )
 
 func Run(identifier string, port string) {
-
+	migrations.Migrate()
+	database.Connect()
 	log.Printf("Starting server on http://localhost:%s", port)
 
 	r := chi.NewRouter()
