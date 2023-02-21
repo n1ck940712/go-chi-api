@@ -27,6 +27,13 @@ restart: ## Restart docker containers
 psql: ## Connect to postgres container
 	$(DOCKER_COMPOSE_COMMAND) exec postgres_db psql -U postgres
 
+hotreload_on: ## enable hotreload
+	touch .env
+	echo 'DOCKERFILE_BASE="local.hotreload"' >> .env
+
+hotreload_off: ## disable hotreload
+	rm -f .env
+
 network_create: ## Create default docker network
 	docker network create $(DOCKER_NETWORK)
 
