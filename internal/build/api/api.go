@@ -1,6 +1,7 @@
 package api
 
 import (
+	"go-chi-api/api/item"
 	"go-chi-api/api/post"
 	"go-chi-api/internal/database"
 	"go-chi-api/internal/migrations"
@@ -30,7 +31,10 @@ func Run(identifier string, port string) {
 		w.Write([]byte("Hello World!"))
 	})
 
+	// test endpoints
 	r.Mount("/posts", post.PostsResource{}.Routes())
+
+	r.Mount("/items", item.ItemsResource{}.Routes())
 
 	log.Fatal(http.ListenAndServe(":"+port, r))
 }
