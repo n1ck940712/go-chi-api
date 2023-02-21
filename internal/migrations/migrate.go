@@ -13,6 +13,6 @@ func init() {
 
 func Migrate() {
 	fmt.Println("Running migration...")
-	database.DB.DB.AutoMigrate(&models.ItemTable{})
+	database.DB.AutoMigrate(&models.ItemTable{})
 	fmt.Println("Migration complete")
 }

@@ -10,11 +10,11 @@ import (
 	"gorm.io/gorm/logger"
 )
 
-type DbInstance struct {
-	DB *gorm.DB
-}
+// type DbInstance struct {
+// 	DB *gorm.DB
+// }
 
-var DB DbInstance
+var DB *gorm.DB
 
 func Connect() {
 	dsn := fmt.Sprintf(
@@ -35,5 +35,5 @@ func Connect() {
 	log.Println("Connected to database")
 	db.Logger = logger.Default.LogMode(logger.Info)
 
-	DB = DbInstance{DB: db}
+	DB = db
 }
