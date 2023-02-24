@@ -2,7 +2,9 @@ package api
 
 import (
 	"go-chi-api/api/item"
+	"go-chi-api/api/login"
 	"go-chi-api/api/post"
+	"go-chi-api/api/user"
 	"go-chi-api/internal/database"
 	"go-chi-api/internal/migrations"
 	"log"
@@ -32,9 +34,13 @@ func Run(identifier string, port string) {
 	})
 
 	// test endpoints
-	r.Mount("/posts", post.PostsResource{}.Routes())
+	r.Mount("/post", post.PostsResource{}.Routes())
 
-	r.Mount("/items", item.ItemsResource{}.Routes())
+	r.Mount("/item", item.ItemsResource{}.Routes())
+
+	r.Mount("/login", login.LoginResource{}.Routes())
+
+	r.Mount("/user", user.UsersResource{}.Routes())
 
 	log.Fatal(http.ListenAndServe(":"+port, r))
 }

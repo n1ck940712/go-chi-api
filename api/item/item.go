@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"go-chi-api/internal/database"
+	"go-chi-api/internal/middlewares"
 	"go-chi-api/internal/response"
 	"go-chi-api/models"
 
@@ -18,7 +19,7 @@ type ItemsResource struct{}
 
 func (rs ItemsResource) Routes() chi.Router {
 	r := chi.NewRouter()
-
+	r.Use(middlewares.JwtAuthentication)
 	r.Get("/", rs.List)
 	r.Post("/", rs.Create)
 
