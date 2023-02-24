@@ -14,5 +14,6 @@ func init() {
 func Migrate() {
 	fmt.Println("Running migration...")
 	database.DB.AutoMigrate(&models.ItemTable{})
+	database.DB.AutoMigrate(&models.User{})
 	fmt.Println("Migration complete")
 }
