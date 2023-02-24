@@ -90,6 +90,7 @@ func (u *User) Get(db *gorm.DB, id int32) (*User, error) {
 }
 
 func (u *User) Save(db *gorm.DB) (*User, error) {
+	u.Password = HashPassword(u.Password)
 	err := db.Debug().Create(&u).Error
 	if err != nil {
 		return &User{}, err
