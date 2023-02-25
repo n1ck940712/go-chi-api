@@ -3,7 +3,6 @@ package api
 import (
 	"go-chi-api/api/item"
 	"go-chi-api/api/login"
-	"go-chi-api/api/post"
 	"go-chi-api/api/user"
 	"go-chi-api/internal/database"
 	"go-chi-api/internal/migrations"
@@ -27,14 +26,10 @@ func Run(identifier string, port string) {
 
 	// r.Use(middleware.Timeout(60 * time.Second))
 
-	// health check
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/plain")
 		w.Write([]byte("Hello World!"))
 	})
-
-	// test endpoints
-	r.Mount("/post", post.PostsResource{}.Routes())
 
 	r.Mount("/item", item.ItemsResource{}.Routes())
 
