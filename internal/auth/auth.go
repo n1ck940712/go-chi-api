@@ -1,21 +1,24 @@
 package auth
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
 	"strings"
 	"time"
 
+	"go-chi-api/models"
+
 	jwt "github.com/dgrijalva/jwt-go"
 )
 
-func CreateToken(userId int32) (string, error) {
+func CreateToken(user *models.User) (string, error) {
 	claims := jwt.MapClaims{}
 	claims["authorized"] = true
-	claims["user_id"] = userId
+	claims["user_id"] = user.ID
+	claims["role"] = user.Role
 	claims["exp"] = time.Now().Add(time.Hour * 24).Unix()
-	fmt.Printf("claims: %v", claims)
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString([]byte(os.Getenv("JWT_SECRET")))
 }
@@ -35,7 +38,6 @@ func ParseToken(tokenString string) (*jwt.Token, error) {
 
 func TokenValid(r *http.Request) error {
 	tokenString, err := ExtractToken(r)
-	fmt.Printf("request tokenString: %s", tokenString)
 	if err != nil {
 		return err
 	}
@@ -45,6 +47,22 @@ func TokenValid(r *http.Request) error {
 	}
 	if !token.Valid {
 		return err
+	}
+	return nil
+}
+
+func TokenValidIsAdmin(r *http.Request) error {
+	token, err := ExtractToken(r)
+	if err != nil {
+		return err
+	}
+	claims, err := ExtractTokenMetadata(token)
+	if err != nil {
+		return err
+	}
+	if claims["role"] != "admin" {
+		fmt.Printf("not admin: %s", claims["role"])
+		return errors.New("unauthorized")
 	}
 	return nil
 }

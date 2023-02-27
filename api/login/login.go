@@ -41,8 +41,9 @@ func (rs LoginResource) Login(w http.ResponseWriter, r *http.Request) {
 
 	if !pwMatch {
 		response.ERROR(w, http.StatusUnauthorized, errors.New("invalid login credentials"))
+		return
 	}
-	token, _ := auth.CreateToken(retrievedUser.ID)
+	token, _ := auth.CreateToken(&retrievedUser)
 	fmt.Printf("token: %s", token)
 	response.JSON(w, http.StatusOK, token)
 }
