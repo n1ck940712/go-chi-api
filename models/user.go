@@ -10,13 +10,13 @@ import (
 )
 
 type User struct {
-	ID        int32
-	Username  string `gorm:"text;size:255;not null;unique;default:null"`
-	Password  string `gorm:"text;size:100;not null;default:null"`
-	Email     string `gorm:"text;null;default:null"`
-	Role      string `gorm:"text;size:255;not null;default:'user'"`
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	ID        int32     `json:"id"`
+	Username  string    `gorm:"text;size:255;not null;unique;default:null" json:"username"`
+	Password  string    `gorm:"text;size:100;not null;default:null" json:"password"`
+	Email     string    `gorm:"text;null;default:null" json:"email""`
+	Role      string    `gorm:"text;size:255;not null;default:'user'" json:"role"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 func HashPassword(password string) string {
