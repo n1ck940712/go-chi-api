@@ -5,9 +5,11 @@ import (
 	"encoding/json"
 	_ "fmt"
 	"net/http"
+	"strconv"
 	"time"
 
 	"go-chi-api/internal/database"
+	"go-chi-api/internal/middlewares"
 	"go-chi-api/internal/response"
 	"go-chi-api/models"
 
@@ -18,11 +20,11 @@ type UsersResource struct{}
 
 func (rs UsersResource) Routes() chi.Router {
 	r := chi.NewRouter()
-
-	r.Get("/", rs.List)
 	r.Post("/", rs.Create)
 
-	r.Route("/{id}", func(r chi.Router) {
+	r.With(middlewares.IsAdmin).Get("/", rs.List)
+
+	r.With(middlewares.IsAdmin).Route("/{id}", func(r chi.Router) {
 		r.Use(ctx)
 		r.Get("/", rs.Get)
 		r.Put("/", rs.Update)
@@ -60,10 +62,15 @@ func ctx(next http.Handler) http.Handler {
 }
 
 func (rs UsersResource) Get(w http.ResponseWriter, r *http.Request) {
-	result := models.User{}
+	user := models.User{}
 	id := r.Context().Value("id").(string)
-	database.DB.Find(&result, id)
-	response.JSON(w, http.StatusOK, result)
+	idStr, _ := strconv.Atoi(id)
+
+	if retrievedUser, err := user.Get(database.DB, int32(idStr)); err != nil {
+		response.JSON(w, http.StatusNotFound, err.Error())
+	} else {
+		response.JSON(w, http.StatusOK, retrievedUser)
+	}
 
 }
 

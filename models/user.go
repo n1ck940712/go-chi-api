@@ -14,6 +14,7 @@ type User struct {
 	Username  string `gorm:"text;size:255;not null;unique;default:null"`
 	Password  string `gorm:"text;size:100;not null;default:null"`
 	Email     string `gorm:"text;null;default:null"`
+	Role      string `gorm:"text;size:255;not null;default:'user'"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
