@@ -1,7 +1,7 @@
 package main
 
 import (
-	"go-chi-api/internal/build/api"
+	"go-chi-api/cmd/api"
 	"os"
 )
 
