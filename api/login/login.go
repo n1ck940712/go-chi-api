@@ -8,8 +8,8 @@ import (
 
 	"go-chi-api/internal/auth"
 	"go-chi-api/internal/database"
+	"go-chi-api/internal/models"
 	"go-chi-api/internal/response"
-	"go-chi-api/models"
 
 	"github.com/go-chi/chi/v5"
 )
