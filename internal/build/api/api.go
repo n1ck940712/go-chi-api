@@ -1,9 +1,9 @@
 package api
 
 import (
-	"go-chi-api/api/item"
-	"go-chi-api/api/login"
-	"go-chi-api/api/user"
+	"go-chi-api/internal/api/v1/item"
+	"go-chi-api/internal/api/v1/login"
+	"go-chi-api/internal/api/v1/user"
 	"go-chi-api/internal/database"
 	"go-chi-api/internal/migrations"
 	"log"
