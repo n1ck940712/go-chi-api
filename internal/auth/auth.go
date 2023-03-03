@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"go-chi-api/models"
+	"go-chi-api/internal/models"
 
 	jwt "github.com/dgrijalva/jwt-go"
 )

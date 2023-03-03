@@ -1,42 +1,41 @@
-// package main
+package api
 
-// import (
-// 	"go-chi-api/api/post"
-// 	"log"
-// 	"net/http"
-// 	"os"
+import (
+	"go-chi-api/internal/api/v1/item"
+	"go-chi-api/internal/api/v1/login"
+	"go-chi-api/internal/api/v1/user"
+	"go-chi-api/internal/database"
+	"go-chi-api/internal/migrations"
+	"log"
+	"net/http"
 
-// 	"github.com/go-chi/chi/v5"
-// 	"github.com/go-chi/chi/v5/middleware"
-// )
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+)
 
-// func main() {
-// 	port := "8080" // TODO read from env
-// 	POSTGRES_HOST := os.Getenv("POSTGRES_HOST")
-// 	log.Printf("POSTGRES_HOST: %s", POSTGRES_HOST)
-// 	// database.Connect()
+func Run(identifier string, port string) {
+	migrations.Migrate()
+	database.Connect()
+	log.Printf("Starting server on http://localhost:%s", port)
 
-// 	if fromEnv := os.Getenv("PORT"); fromEnv != "" {
-// 		port = fromEnv
-// 	}
+	r := chi.NewRouter()
+	r.Use(middleware.RequestID)
+	r.Use(middleware.RealIP)
+	r.Use(middleware.Logger)
+	r.Use(middleware.Recoverer)
 
-// 	log.Printf(">>>Stesttarting server on http://localhost:%s", port)
+	// r.Use(middleware.Timeout(60 * time.Second))
 
-// 	r := chi.NewRouter()
-// 	r.Use(middleware.RequestID)
-// 	r.Use(middleware.RealIP)
-// 	r.Use(middleware.Logger)
-// 	r.Use(middleware.Recoverer)
+	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/plain")
+		w.Write([]byte("Hello World!"))
+	})
 
-// 	// r.Use(middleware.Timeout(60 * time.Second))
+	r.Mount("/item", item.ItemsResource{}.Routes())
 
-// 	// health check
-// 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-// 		w.Header().Set("Content-Type", "text/plain")
-// 		w.Write([]byte("Hello World!"))
-// 	})
+	r.Mount("/login", login.LoginResource{}.Routes())
 
-// 	r.Mount("/posts", post.PostsResource{}.Routes())
+	r.Mount("/user", user.UsersResource{}.Routes())
 
-// 	log.Fatal(http.ListenAndServe(":"+port, r))
-// }
+	log.Fatal(http.ListenAndServe(":"+port, r))
+}

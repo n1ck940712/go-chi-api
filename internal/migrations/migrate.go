@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"go-chi-api/internal/database"
-	"go-chi-api/models"
+	"go-chi-api/internal/models"
 )
 
 func init() {
