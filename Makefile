@@ -25,7 +25,7 @@ restart: ## Restart docker containers
 	$(DOCKER_COMPOSE_COMMAND) restart
 
 psql: ## Connect to postgres container
-	$(DOCKER_COMPOSE_COMMAND) exec postgres_db psql -U postgres
+	$(DOCKER_COMPOSE_COMMAND) exec postgres_db psql -U postgres main
 
 hotreload_on: ## enable hotreload
 	touch .env
