@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	_ "fmt"
 	"net/http"
-	"time"
 
 	"go-chi-api/internal/database"
 	"go-chi-api/internal/middlewares"
@@ -13,6 +12,7 @@ import (
 	"go-chi-api/internal/response"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/google/uuid"
 )
 
 type ItemsResource struct{}
@@ -65,15 +65,10 @@ func (rs ItemsResource) Update(w http.ResponseWriter, r *http.Request) {
 	id := r.Context().Value("id").(string)
 	item := models.ItemTable{}
 	json.NewDecoder(r.Body).Decode(&item)
-	database.DB.Model(&item).Where("id = ?", id).UpdateColumns(
-		map[string]interface{}{
-			"name":       item.Name,
-			"attribute":  item.Attribute,
-			"updated_at": time.Now(),
-		},
-	)
+	item.ID, _ = uuid.Parse(id)
+	database.DB.Updates(item)
 	updated_item := models.ItemTable{}
-	database.DB.Find(&updated_item, id)
+	database.DB.Find(&updated_item, "id=?", id)
 	response.JSON(w, http.StatusOK, updated_item)
 }
 
