@@ -67,8 +67,8 @@ htmlcov
 
 build/docker/docker-compose.test.local.yml
 
-# PyCharm
-.idea
+# IDE
+.vscode
 
 pytest.log
 test-result.xml
