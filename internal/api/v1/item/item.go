@@ -12,7 +12,6 @@ import (
 	"go-chi-api/internal/response"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/google/uuid"
 )
 
 type ItemsResource struct{}
@@ -65,7 +64,6 @@ func (rs ItemsResource) Update(w http.ResponseWriter, r *http.Request) {
 	id := r.Context().Value("id").(string)
 	item := models.ItemTable{}
 	json.NewDecoder(r.Body).Decode(&item)
-	item.ID, _ = uuid.Parse(id)
 	database.DB.Updates(item)
 	updated_item := models.ItemTable{}
 	database.DB.Find(&updated_item, "id=?", id)
