@@ -33,7 +33,7 @@ func (rs RestockResource) Routes() chi.Router {
 
 func GetAllRestocks(w http.ResponseWriter, r *http.Request) {
 	var restocks []models.RestockTable
-	database.DB.Find(&restocks)
+	database.DB.Preload("RestockItems").Find(&restocks)
 	response.JSON(w, http.StatusOK, restocks)
 }
 
@@ -53,7 +53,7 @@ func GetRestock(w http.ResponseWriter, r *http.Request) {
 }
 
 func CreateRestock(w http.ResponseWriter, r *http.Request) {
-	request := CreateRestockRequest{}
+	request := RestockItemsRequest{}
 	reqBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		response.ERROR(w, http.StatusInternalServerError, err)
@@ -75,32 +75,37 @@ func CreateRestock(w http.ResponseWriter, r *http.Request) {
 		if err := database.DB.Create(&restockTable).Error; err != nil {
 			return err
 		}
-
-		restockItem := models.RestockItemTable{
-			Restock:    restockTable,
-			ItemID:     request.ItemID,
-			Quantity:   request.Quantity,
-			UnitPrice:  request.Price,
-			TotalPrice: decimal.NewFromFloat(float64(request.Quantity)).Mul(request.Price),
+		for _, item := range request.Items {
+			restockItem := models.RestockItemTable{
+				Restock:    restockTable,
+				ItemID:     item.ItemID,
+				Quantity:   item.Quantity,
+				UnitPrice:  item.Price,
+				TotalPrice: decimal.NewFromFloat(float64(item.Quantity)).Mul(item.Price),
+			}
+			if err := database.DB.Create(&restockItem).Error; err != nil {
+				return err
+			}
+			database.DB.Model(&models.ItemTable{}).Where("id = ?", item.ItemID).Update("quantity", gorm.Expr("quantity + ?", item.Quantity))
 		}
-		if err := database.DB.Create(&restockItem).Error; err != nil {
-			return err
-		}
-		database.DB.Model(&models.ItemTable{}).Where("id = ?", request.ItemID).Update("quantity", gorm.Expr("quantity + ?", request.Quantity))
 		return nil
 	})
-
+	database.DB.Preload("RestockItems").Find(&restockTable, restockTable.ID)
 	response.JSON(w, http.StatusOK, restockTable)
 }
 
-type CreateRestockRequest struct {
-	ItemID      int32           `json:"item_id" validate:"required,number"`
-	Quantity    int32           `json:"quantity" validate:"required,number"`
-	Price       decimal.Decimal `json:"price" validate:"required,number"`
-	Description string          `json:"description"`
+type RestockItemsRequest struct {
+	Description string               `json:"description"`
+	Items       []RestockItemRequest `json:"items" validate:"required"`
 }
 
-func (r *CreateRestockRequest) Validate() error {
+type RestockItemRequest struct {
+	ItemID   int32           `json:"item_id" validate:"required,gte=1"`
+	Quantity int32           `json:"quantity" validate:"required,gte=1"`
+	Price    decimal.Decimal `json:"price" validate:"required,gte=0"`
+}
+
+func (r *RestockItemsRequest) Validate() error {
 	// Validate request
 	validate := validator.New()
 	err := validate.Struct(r)
@@ -109,13 +114,15 @@ func (r *CreateRestockRequest) Validate() error {
 	}
 
 	// Check if item exists
-	item, err := models.GetItemFromID(r.ItemID)
-	fmt.Println(item)
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return fmt.Errorf("item with ID %d does not exist", r.ItemID)
+	for _, item := range r.Items {
+		var itemTable models.ItemTable
+		result := database.DB.First(&itemTable, item.ItemID)
+		if result.Error != nil {
+			if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+				return fmt.Errorf("item with id %d does not exist", item.ItemID)
+			}
+			return result.Error
 		}
-		return err
 	}
 
 	return nil
