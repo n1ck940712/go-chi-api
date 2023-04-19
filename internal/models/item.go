@@ -29,7 +29,7 @@ type ItemPriceHistoryTable struct {
 }
 
 type ItemTypeTable struct {
-	ID          int64  `gorm:"type:uuid;default:uuid_generate_v4()" json:"id"`
+	ID          int64  `json:"id"`
 	Name        string `gorm:"text;not null;default:null" json:"name"`
 	Description string `gorm:"text;null;default:null" json:"description"`
 }
