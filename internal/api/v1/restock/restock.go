@@ -40,7 +40,7 @@ func GetAllRestocks(w http.ResponseWriter, r *http.Request) {
 func GetRestock(w http.ResponseWriter, r *http.Request) {
 	restockID := chi.URLParam(r, "restockID")
 	var restock models.RestockTable
-	result := database.DB.First(&restock, restockID)
+	result := database.DB.Preload("RestockItems").First(&restock, restockID)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			response.ERROR(w, http.StatusNotFound, result.Error)
