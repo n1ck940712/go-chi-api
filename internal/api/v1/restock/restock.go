@@ -112,6 +112,9 @@ func (r *CreateRestockRequest) Validate() error {
 	item, err := models.GetItemFromID(r.ItemID)
 	fmt.Println(item)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return fmt.Errorf("item with ID %d does not exist", r.ItemID)
+		}
 		return err
 	}
 
