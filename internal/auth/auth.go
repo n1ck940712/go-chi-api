@@ -1,6 +1,9 @@
 package auth
 
 import (
+	"crypto/rand"
+	"crypto/sha512"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"net/http"
@@ -8,19 +11,41 @@ import (
 	"strings"
 	"time"
 
+	"go-chi-api/internal/database"
 	"go-chi-api/internal/models"
 
 	jwt "github.com/dgrijalva/jwt-go"
 )
 
+const (
+	TokenExpiryDuration = time.Hour * 24 * 1 // 1 day
+)
+
 func CreateToken(user *models.User) (string, error) {
-	claims := jwt.MapClaims{}
-	claims["authorized"] = true
-	claims["user_id"] = user.ID
-	claims["role"] = user.Role
-	claims["exp"] = time.Now().Add(time.Hour * 24).Unix()
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString([]byte(os.Getenv("JWT_SECRET")))
+	// Generate a 32-byte random string
+	b := make([]byte, 64)
+	_, err := rand.Read(b)
+	if err != nil {
+		return "", err
+	}
+	// Encode the random string in base64
+	token := sha512.Sum512(b)
+	tokenString := hex.EncodeToString(token[:])
+
+	// Save the session token in the database
+	session := models.SesssionTable{
+		UserID:  user.ID,
+		Token:   tokenString,
+		Expires: time.Now().Add(TokenExpiryDuration),
+	}
+	result := database.DB.Create(&session)
+	if result.Error != nil {
+		return "", result.Error
+	}
+	if result.RowsAffected == 0 {
+		return "", errors.New("failed to create session token")
+	}
+	return tokenString, nil
 }
 
 func ParseToken(tokenString string) (*jwt.Token, error) {
@@ -41,27 +66,30 @@ func TokenValid(r *http.Request) error {
 	if err != nil {
 		return err
 	}
-	token, err := ParseToken(tokenString)
+	session, err := models.GetSessionByToken(tokenString)
 	if err != nil {
-		return err
-	}
-	if !token.Valid {
 		return err
 	}
 	return nil
 }
 
 func TokenValidIsAdmin(r *http.Request) error {
-	token, err := ExtractToken(r)
+	tokenString, err := ExtractToken(r)
 	if err != nil {
 		return err
 	}
-	claims, err := ExtractTokenMetadata(token)
+	session, err := models.GetSessionByToken(tokenString)
 	if err != nil {
 		return err
 	}
-	if claims["role"] != "admin" {
-		fmt.Printf("not admin: %s", claims["role"])
+	user := models.User{}
+	fetchedUser, err := user.Get(database.DB, session.UserID)
+	if err != nil {
+		return err
+	}
+
+	if fetchedUser.Role != "admin" {
+		fmt.Printf("not admin: %s", session.User.Role)
 		return errors.New("unauthorized")
 	}
 	return nil
@@ -78,28 +106,4 @@ func ExtractToken(r *http.Request) (string, error) {
 		return strArr[1], nil
 	}
 	return "", nil
-}
-
-func ExtractTokenID(r *http.Request) (int32, error) {
-	token, err := ExtractToken(r)
-	if err != nil {
-		return 0, err
-	}
-	claims, err := ExtractTokenMetadata(token)
-	if err != nil {
-		return 0, err
-	}
-	return claims["user_id"].(int32), nil
-}
-
-func ExtractTokenMetadata(tokenString string) (jwt.MapClaims, error) {
-	token, err := ParseToken(tokenString)
-	if err != nil {
-		return nil, err
-	}
-	claims, ok := token.Claims.(jwt.MapClaims)
-	if ok && token.Valid {
-		return claims, nil
-	}
-	return nil, err
 }
