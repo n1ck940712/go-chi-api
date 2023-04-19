@@ -22,7 +22,7 @@ type ItemsResource struct{}
 
 func (rs ItemsResource) Routes() chi.Router {
 	r := chi.NewRouter()
-	r.Use(middlewares.JwtAuthentication)
+	r.Use(middlewares.BaseAuthentication)
 	r.Get("/", rs.List)
 	r.Post("/", rs.Create)
 
