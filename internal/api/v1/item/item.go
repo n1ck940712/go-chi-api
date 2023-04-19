@@ -3,6 +3,7 @@ package item
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	_ "fmt"
 	"io/ioutil"
@@ -16,6 +17,7 @@ import (
 	"go-chi-api/internal/response"
 
 	"github.com/go-chi/chi/v5"
+	"gorm.io/gorm"
 )
 
 type ItemsResource struct{}
@@ -38,7 +40,7 @@ func (rs ItemsResource) Routes() chi.Router {
 
 func (rs ItemsResource) List(w http.ResponseWriter, r *http.Request) {
 	result := []models.ItemTable{}
-	database.DB.Find(&result)
+	database.DB.Preload("ItemType").Find(&result)
 	response.JSON(w, http.StatusOK, result)
 }
 
@@ -55,8 +57,16 @@ func (rs ItemsResource) Create(w http.ResponseWriter, r *http.Request) {
 	}
 	json.Unmarshal(reqBody, &request)
 	var itemType models.ItemTypeTable
-	if err := database.DB.First(&itemType, request.ItemTypeID).Error; err != nil {
-		fmt.Println(err)
+
+	result := database.DB.First(&itemType, request.ItemTypeID)
+
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			response.ERROR(w, http.StatusNotFound, fmt.Errorf(fmt.Sprintf("Item type with id %d not found", request.ItemTypeID)))
+			return
+		}
+		response.ERROR(w, http.StatusInternalServerError, result.Error)
+		return
 	}
 	item.ItemType = itemType
 	database.DB.Create(&item)
