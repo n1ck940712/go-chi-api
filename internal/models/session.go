@@ -9,7 +9,7 @@ import (
 )
 
 type SesssionTable struct {
-	ID      int64     `json:"id"`
+	ID      int32     `json:"id"`
 	UserID  int32     `json:"-"`
 	User    User      `gorm:"foreignKey:UserID;references:ID" json:"user"`
 	Token   string    `gorm:"uniqueIndex"`

@@ -51,7 +51,7 @@ func (rs ItemsResource) Create(w http.ResponseWriter, r *http.Request) {
 	json.Unmarshal(reqBody, &item)
 
 	var request struct {
-		ItemTypeID int64 `json:"item_type_id"`
+		ItemTypeID int32 `json:"item_type_id"`
 	}
 	json.Unmarshal(reqBody, &request)
 	var itemType models.ItemTypeTable
