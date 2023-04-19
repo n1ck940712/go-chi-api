@@ -70,16 +70,25 @@ func CreateRestock(w http.ResponseWriter, r *http.Request) {
 	json.Unmarshal(reqBody, &restockTable)
 
 	restockTable.UserID = user.ID
-	database.DB.Create(&restockTable)
 
-	restockItem := models.RestockItemTable{
-		Restock:    restockTable,
-		ItemID:     request.ItemID,
-		Quantity:   request.Quantity,
-		UnitPrice:  request.Price,
-		TotalPrice: decimal.NewFromFloat(float64(request.Quantity)).Mul(request.Price),
-	}
-	database.DB.Create(&restockItem)
+	database.DB.Transaction(func(tx *gorm.DB) error {
+		if err := database.DB.Create(&restockTable).Error; err != nil {
+			return err
+		}
+
+		restockItem := models.RestockItemTable{
+			Restock:    restockTable,
+			ItemID:     request.ItemID,
+			Quantity:   request.Quantity,
+			UnitPrice:  request.Price,
+			TotalPrice: decimal.NewFromFloat(float64(request.Quantity)).Mul(request.Price),
+		}
+		if err := database.DB.Create(&restockItem).Error; err != nil {
+			return err
+		}
+		database.DB.Model(&models.ItemTable{}).Where("id = ?", request.ItemID).Update("quantity", gorm.Expr("quantity + ?", request.Quantity))
+		return nil
+	})
 
 	response.JSON(w, http.StatusOK, restockTable)
 }

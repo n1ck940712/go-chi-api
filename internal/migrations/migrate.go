@@ -21,7 +21,7 @@ func Migrate() {
 	// database.DB.AutoMigrate(&models.CustomerTable{})
 	// database.DB.AutoMigrate(&models.OrderTable{})
 	// database.DB.AutoMigrate(&models.OrderItemTable{})
-	// database.DB.AutoMigrate(&models.RestockTable{})
-	// database.DB.AutoMigrate(&models.RestockItemTable{})
+	database.DB.AutoMigrate(&models.RestockTable{})
+	database.DB.AutoMigrate(&models.RestockItemTable{})
 	fmt.Println("Migration complete")
 }
