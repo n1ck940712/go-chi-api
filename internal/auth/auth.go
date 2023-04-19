@@ -61,16 +61,22 @@ func ParseToken(tokenString string) (*jwt.Token, error) {
 	return token, nil
 }
 
-func TokenValid(r *http.Request) error {
+func TokenValid(r *http.Request) (*models.User, error) {
 	tokenString, err := ExtractToken(r)
 	if err != nil {
-		return err
+		return &models.User{}, err
 	}
 	session, err := models.GetSessionByToken(tokenString)
+	fmt.Println(session)
 	if err != nil {
-		return err
+		return &models.User{}, err
 	}
-	return nil
+	user2 := models.User{}
+	user, err := user2.Get(database.DB, session.UserID)
+	if err != nil {
+		return &models.User{}, err
+	}
+	return user, nil
 }
 
 func TokenValidIsAdmin(r *http.Request) error {
