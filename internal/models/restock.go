@@ -8,8 +8,8 @@ import (
 
 type RestockTable struct {
 	ID          int32     `json:"id"`
-	UserID      int32     `json:"-"`
-	User        User      `gorm:"foreign:UserID;references:ID" json:"user"`
+	UserID      int32     `json:"user_id"`
+	User        User      `gorm:"foreign:UserID;references:ID" json:"-"`
 	Description string    `gorm:"type:text;null;default:null" json:"description"`
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
