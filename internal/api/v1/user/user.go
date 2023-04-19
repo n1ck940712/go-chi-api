@@ -3,10 +3,10 @@ package user
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	_ "fmt"
 	"net/http"
 	"strconv"
-	"time"
 
 	"go-chi-api/internal/database"
 	"go-chi-api/internal/middlewares"
@@ -27,7 +27,7 @@ func (rs UsersResource) Routes() chi.Router {
 	r.With(middlewares.IsAdmin).Route("/{id}", func(r chi.Router) {
 		r.Use(ctx)
 		r.Get("/", rs.Get)
-		r.Put("/", rs.Update)
+		// r.Put("/", rs.Update)
 		r.Delete("/", rs.Delete)
 	})
 
@@ -35,9 +35,13 @@ func (rs UsersResource) Routes() chi.Router {
 }
 
 func (rs UsersResource) List(w http.ResponseWriter, r *http.Request) {
-	result := []models.User{}
-	database.DB.Find(&result)
-	response.JSON(w, http.StatusOK, result)
+	users := models.User{}
+	if err := database.DB.Find(&users).Error; err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	response.JSON(w, http.StatusOK, users)
+
 }
 
 func (rs UsersResource) Create(w http.ResponseWriter, r *http.Request) {
@@ -74,25 +78,50 @@ func (rs UsersResource) Get(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func (rs UsersResource) Update(w http.ResponseWriter, r *http.Request) {
-	id := r.Context().Value("id").(string)
-	User := models.User{}
-	json.NewDecoder(r.Body).Decode(&User)
-	database.DB.Model(&User).Where("id = ?", id).UpdateColumns(
-		map[string]interface{}{
-			"username":   User.Username,
-			"password":   User.Password,
-			"updated_at": time.Now(),
-		},
-	)
-	updated_User := models.User{}
-	database.DB.Find(&updated_User, id)
-	response.JSON(w, http.StatusOK, updated_User)
-}
+// func (rs UsersResource) Update(w http.ResponseWriter, r *http.Request) {
+// 	id := r.Context().Value("id").(string)
+// 	User := models.User{}
+// 	json.NewDecoder(r.Body).Decode(&User)
+// 	database.DB.Model(&User).Where("id = ?", id).UpdateColumns(
+// 		map[string]interface{}{
+// 			"username":   User.Username,
+// 			"password":   User.Password,
+// 			"updated_at": time.Now(),
+// 		},
+// 	)
+// 	updated_User := models.User{}
+// 	database.DB.Find(&updated_User, id)
+// 	response.JSON(w, http.StatusOK, updated_User)
+// }
 
 func (rs UsersResource) Delete(w http.ResponseWriter, r *http.Request) {
-	User := models.User{}
-	id := r.Context().Value("id").(string)
-	database.DB.Delete(&User, id)
-	response.JSON(w, http.StatusNoContent, nil)
+	user := getUserFromCtx(r)
+
+	if user == nil {
+		w.WriteHeader(http.StatusNotFound)
+		response.JSON(w, http.StatusNotFound, "User not found")
+		return
+	}
+
+	result := database.DB.Delete(&user)
+
+	if result.RowsAffected == 0 {
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
+	response.JSON(w, http.StatusOK, fmt.Sprintf("User ID (%d) deleted", user.ID))
+}
+
+func getUserFromCtx(r *http.Request) *models.User {
+	// Retrieve the user ID from the request context
+	userID := r.Context().Value("id")
+	// Query the database for the user with the given ID
+	var user models.User
+	result := database.DB.Where("id = ?", userID).First(&user)
+	if result.Error != nil {
+		fmt.Println("Could not find user with ID", userID)
+		return nil
+	}
+
+	return &user
 }

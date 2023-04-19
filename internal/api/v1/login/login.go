@@ -3,7 +3,6 @@ package login
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 
 	"go-chi-api/internal/auth"
@@ -44,6 +43,6 @@ func (rs LoginResource) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	token, _ := auth.CreateToken(&retrievedUser)
-	fmt.Printf("token: %s", token)
+
 	response.JSON(w, http.StatusOK, token)
 }
