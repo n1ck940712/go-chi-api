@@ -33,12 +33,12 @@ func CreateToken(user *models.User) (string, error) {
 	tokenString := hex.EncodeToString(token[:])
 
 	// Save the session token in the database
-	session := models.SesssionTable{
+	session := models.SessionTable{
 		UserID:  user.ID,
 		Token:   tokenString,
 		Expires: time.Now().Add(TokenExpiryDuration),
 	}
-	result := database.DB.Create(&session)
+	result := database.DB.Where("user_id=?", user.ID).FirstOrCreate(&session)
 	if result.Error != nil {
 		return "", result.Error
 	}

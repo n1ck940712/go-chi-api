@@ -17,7 +17,7 @@ func Migrate() {
 	database.DB.AutoMigrate(&models.ItemTypeTable{})
 	database.DB.AutoMigrate(&models.ItemPriceHistoryTable{})
 	database.DB.AutoMigrate(&models.User{})
-	database.DB.AutoMigrate(&models.SesssionTable{})
+	database.DB.AutoMigrate(&models.SessionTable{})
 	// database.DB.AutoMigrate(&models.CustomerTable{})
 	// database.DB.AutoMigrate(&models.OrderTable{})
 	// database.DB.AutoMigrate(&models.OrderItemTable{})

@@ -8,23 +8,23 @@ import (
 	"gorm.io/gorm"
 )
 
-type SesssionTable struct {
+type SessionTable struct {
 	ID      int32     `json:"id"`
-	UserID  int32     `json:"-"`
-	User    User      `gorm:"foreignKey:UserID;references:ID" json:"user"`
+	UserID  int32     `json:"user_id"`
+	User    User      `gorm:"foreignKey:UserID;references:ID" json:"-"`
 	Token   string    `gorm:"uniqueIndex"`
 	Expires time.Time `json:"expires"`
 }
 
 // get session entry by token
-func GetSessionByToken(token string) (*SesssionTable, error) {
-	s := &SesssionTable{}
-	err := database.DB.Model(&SesssionTable{}).Where("token = ?", token).Where("expires > ?", time.Now()).Take(&s).Error
+func GetSessionByToken(token string) (*SessionTable, error) {
+	s := &SessionTable{}
+	err := database.DB.Model(&SessionTable{}).Where("token = ?", token).Where("expires > ?", time.Now()).Take(&s).Error
 	if err != nil {
-		return &SesssionTable{}, err
+		return &SessionTable{}, err
 	}
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return &SesssionTable{}, errors.New("session not found")
+		return &SessionTable{}, errors.New("session not found")
 	}
 	return s, err
 }
