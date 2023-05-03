@@ -42,7 +42,11 @@ func (rs LoginResource) Login(w http.ResponseWriter, r *http.Request) {
 		response.ERROR(w, http.StatusUnauthorized, errors.New("invalid login credentials"))
 		return
 	}
-	token, _ := auth.CreateToken(&retrievedUser)
+	token, err := auth.CreateToken(&retrievedUser)
+	if err != nil {
+		response.ERROR(w, http.StatusInternalServerError, err)
+		return
+	}
 
 	response.JSON(w, http.StatusOK, token)
 }
