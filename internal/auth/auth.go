@@ -15,6 +15,7 @@ import (
 	"go-chi-api/internal/models"
 
 	jwt "github.com/dgrijalva/jwt-go"
+	"gorm.io/gorm"
 )
 
 const (
@@ -33,12 +34,21 @@ func CreateToken(user *models.User) (string, error) {
 	tokenString := hex.EncodeToString(token[:])
 
 	// Save the session token in the database
-	session := models.SessionTable{
+	newSession := models.SessionTable{
 		UserID:  user.ID,
 		Token:   tokenString,
 		Expires: time.Now().Add(TokenExpiryDuration),
 	}
-	result := database.DB.Where("user_id=?", user.ID).FirstOrCreate(&session)
+
+	oldSession, err := models.GetSessionByUserID(user.ID)
+
+	var result *gorm.DB
+
+	if err != nil {
+		result = database.DB.Create(&newSession)
+	} else {
+		result = database.DB.Model(&models.SessionTable{}).Where("id = ?", oldSession.ID).Updates(newSession)
+	}
 	if result.Error != nil {
 		return "", result.Error
 	}
