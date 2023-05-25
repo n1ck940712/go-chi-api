@@ -15,7 +15,7 @@ type ItemTable struct {
 	Price       decimal.Decimal `gorm:"type:decimal(10,2);not null;default:0" json:"price"`
 	ItemTypeID  int32           `json:"item_type_id"`
 	ItemType    ItemTypeTable   `gorm:"foreignKey:ItemTypeID;references:ID" json:"-"`
-	IsActive    bool            `gorm:"type:boolean;not null;default:true" json:"is_active"`
+	IsActive    *bool           `gorm:"type:boolean;not null;default:true" json:"is_active"`
 	CreatedAt   time.Time       `json:"created_at"`
 	UpdatedAt   time.Time       `json:"updated_at"`
 }
