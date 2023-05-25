@@ -3,7 +3,6 @@ package item
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	_ "fmt"
 	"io/ioutil"
@@ -17,7 +16,6 @@ import (
 	"go-chi-api/internal/response"
 
 	"github.com/go-chi/chi/v5"
-	"gorm.io/gorm"
 )
 
 type ItemsResource struct{}
@@ -58,18 +56,21 @@ func (rs ItemsResource) Create(w http.ResponseWriter, r *http.Request) {
 	json.Unmarshal(reqBody, &request)
 	var itemType models.ItemTypeTable
 
-	result := database.DB.First(&itemType, request.ItemTypeID)
-
-	if result.Error != nil {
-		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-			response.ERROR(w, http.StatusNotFound, fmt.Errorf(fmt.Sprintf("Item type with id %d not found", request.ItemTypeID)))
+	item.ItemType = itemType
+	if err := database.DB.Create(&item).Error; err != nil {
+		b, _ := json.Marshal(err)
+		fmt.Println(string(b))
+		newError := make(map[string]string)
+		json.Unmarshal(b, &newError)
+		switch newError["Code"] {
+		case "23503":
+			response.ERROR(w, http.StatusBadRequest, fmt.Errorf(fmt.Sprintf("Item type with id %d not found", request.ItemTypeID)))
+			return
+		case "23505":
+			response.ERROR(w, http.StatusBadRequest, fmt.Errorf(fmt.Sprintf("Item with name '%s' already exists", item.Name)))
 			return
 		}
-		response.ERROR(w, http.StatusInternalServerError, result.Error)
-		return
 	}
-	item.ItemType = itemType
-	database.DB.Create(&item)
 	response.JSON(w, http.StatusOK, item)
 }
 

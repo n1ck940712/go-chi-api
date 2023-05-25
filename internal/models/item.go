@@ -9,7 +9,7 @@ import (
 
 type ItemTable struct {
 	ID          int32           `json:"id"`
-	Name        string          `gorm:"type:varchar(100);not null;default:null" json:"name"`
+	Name        string          `gorm:"type:varchar(100);not null;default:null;uniqueIndex" json:"name"`
 	Description string          `gorm:"type:text;null;default:null" json:"description"`
 	Quantity    int32           `gorm:"int;not null;default:0" json:"quantity"`
 	Price       decimal.Decimal `gorm:"type:decimal(10,2);not null;default:0" json:"price"`
