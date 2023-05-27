@@ -94,7 +94,10 @@ func UpdateItemType(w http.ResponseWriter, r *http.Request) {
 		response.ERROR(w, http.StatusNotFound, result.Error)
 		return
 	}
-	json.NewDecoder(r.Body).Decode(&itemType)
+
+	itemType.Name = input.Name
+	itemType.Description = input.Description
+
 	database.DB.Save(&itemType)
 	response.JSON(w, http.StatusOK, itemType)
 }
