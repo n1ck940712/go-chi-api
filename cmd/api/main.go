@@ -1,6 +1,7 @@
 package api
 
 import (
+	"go-chi-api/internal/api/v1/customer"
 	"go-chi-api/internal/api/v1/item"
 	"go-chi-api/internal/api/v1/item_type"
 	"go-chi-api/internal/api/v1/login"
@@ -42,6 +43,8 @@ func Run(identifier string, port string) {
 	r.Mount("/item_type", item_type.ItemTypesResource{}.Routes())
 
 	r.Mount("/restock", restock.RestockResource{}.Routes())
+
+	r.Mount("/customer", customer.CustomerResource{}.Routes())
 
 	log.Fatal(http.ListenAndServe(":"+port, r))
 }
