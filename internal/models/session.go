@@ -28,3 +28,16 @@ func GetSessionByToken(token string) (*SessionTable, error) {
 	}
 	return s, err
 }
+
+// get session entry by user id
+func GetSessionByUserID(userID int32) (*SessionTable, error) {
+	s := &SessionTable{}
+	err := database.DB.Model(&SessionTable{}).Where("user_id = ?", userID).Where("expires > ?", time.Now()).Take(&s).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return &SessionTable{}, errors.New("session not found")
+		}
+		return &SessionTable{}, err
+	}
+	return s, nil
+}
