@@ -7,9 +7,9 @@ import (
 	"go-chi-api/internal/database"
 	"go-chi-api/internal/middlewares"
 	"go-chi-api/internal/models"
+	"go-chi-api/internal/request"
 	"go-chi-api/internal/response"
 	"net/http"
-	"strconv"
 	"strings"
 
 	"github.com/go-chi/chi/v5"
@@ -75,7 +75,7 @@ func CreateCustomer(w http.ResponseWriter, r *http.Request) {
 
 // get single customer by ID
 func GetCustomer(w http.ResponseWriter, r *http.Request) {
-	customerID, err := getCustomerID(w, r)
+	customerID, err := request.GetParamID(w, r)
 	if err != nil {
 		return
 	}
@@ -90,7 +90,7 @@ func GetCustomer(w http.ResponseWriter, r *http.Request) {
 
 // update customer
 func UpdateCustomer(w http.ResponseWriter, r *http.Request) {
-	customerID, err1 := getCustomerID(w, r)
+	customerID, err1 := request.GetParamID(w, r)
 	if err1 != nil {
 		return
 	}
@@ -136,7 +136,7 @@ func UpdateCustomer(w http.ResponseWriter, r *http.Request) {
 
 // delete customer
 func DeleteCustomer(w http.ResponseWriter, r *http.Request) {
-	customerID, err := getCustomerID(w, r)
+	customerID, err := request.GetParamID(w, r)
 	if err != nil {
 		return
 	}
@@ -147,15 +147,4 @@ func DeleteCustomer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-}
-
-// check if customerID param is a valid integer
-func getCustomerID(w http.ResponseWriter, r *http.Request) (int, error) {
-	customerID := chi.URLParam(r, "id")
-	id, err := strconv.Atoi(customerID)
-	if err != nil {
-		response.ERROR(w, http.StatusNotFound, fmt.Errorf("id param is an invalid integer"))
-		return 0, err
-	}
-	return id, nil
 }
